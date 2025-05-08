@@ -3,7 +3,7 @@
 @prefix schema: <https://schema.org/> .
 @prefix sh: <http://www.w3.org/ns/shacl#> .
 
-ex:1_Mapping_Lyme a sh:SPARQLExecutable,
+ex:1_ORDO_Mapping_Lyme a sh:SPARQLExecutable,
         sh:SPARQLSelectExecutable ;
     rdfs:comment "Getting ORDO mappings for Lyme disease."@en ;
     sh:prefixes _:sparql_examples_prefixes ;
