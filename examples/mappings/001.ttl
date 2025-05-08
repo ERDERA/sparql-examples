@@ -13,6 +13,6 @@ PREFIX ORDO: <http://www.orpha.net/ORDO/>
 SELECT ?object WHERE { 
 	ordo:Orphanet_91546 oboInOwl:hasDbXref ?object .
 }""" ;
-    schema:target <https://www.orpha.net/sparql> .
+    schema:target <https://localhost:7200/sparql> .
 
 
