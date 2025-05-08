@@ -8,7 +8,7 @@ ex:1_Mapping_Lyme a sh:SPARQLExecutable,
     rdfs:comment "Getting ORDO mappings for Lyme disease."@en ;
     sh:prefixes _:sparql_examples_prefixes ;
     sh:select """PREFIX oboInOwl: <http://www.geneontology.org/formats/oboInOwl#>
-PREFIX ORDO: <http://www.orpha.net/ORDO/>
+PREFIX ordo: <http://www.orpha.net/ORDO/>
 
 SELECT ?object WHERE { 
 	ordo:Orphanet_91546 oboInOwl:hasDbXref ?object .
