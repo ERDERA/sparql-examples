@@ -1,1 +1,18 @@
+@prefix ex: <https://www.bgee.org/sparql/.well-known/sparql-examples/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix schema: <https://schema.org/> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+
+ex:1_Mapping_Lyme a sh:SPARQLExecutable,
+        sh:SPARQLSelectExecutable ;
+    rdfs:comment "Getting ORDO mappings for Lyme disease."@en ;
+    sh:prefixes _:sparql_examples_prefixes ;
+    sh:select """PREFIX oboInOwl: <http://www.geneontology.org/formats/oboInOwl#>
+PREFIX ORDO: <http://www.orpha.net/ORDO/>
+
+SELECT ?object WHERE { 
+	ordo:Orphanet_91546 oboInOwl:hasDbXref ?object .
+}""" ;
+    schema:target <https://www.orpha.net/sparql> .
+
 
