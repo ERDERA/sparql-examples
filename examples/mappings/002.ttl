@@ -6,10 +6,50 @@
 
 ex:2_Mapping_Lyme_sources a sh:SPARQLExecutable,
         sh:SPARQLSelectExecutable ;
-    rdfs:comment "From ORDO, obtain all the matching sources and identifiers for a disease.\n Use these identifiers to query the other cascading resources to obtain a map of the resources linked to a disease."@en ;
+    rdfs:comment "From ORDO, obtain all the matching sources and identifiers for a disease.\n Use these identifiers to query the other cascading resources to obtain a map of the resources linked to a disease. \n - Currently Ordo and Mondo"@en ;
     sh:prefixes _:sparql_examples_prefixes ;
     sh:select """PREFIX oboInOwl: <http://www.geneontology.org/formats/oboInOwl#>
-# TODO
+PREFIX obo: <http://purl.obolibrary.org/obo/>
+PREFIX ORDO: <http://www.orpha.net/ORDO/>
+
+CONSTRUCT {
+  obo:MONDO_0019632 oboInOwl:hasDbXref ?xrefMondo .
+  ORDO:Orphanet_91546 oboInOwl:hasDbXref ?xrefOrdo .
+}
+WHERE {
+  {
+    obo:MONDO_0019632 oboInOwl:hasDbXref ?xref .
+   
+    BIND(
+        IF(
+          CONTAINS(STR(?xref), "Orphanet"),
+          IRI(CONCAT("http://www.orpha.net/ORDO/", ENCODE_FOR_URI(REPLACE(STR(?xref), "^.*Orphanet:", "Orphanet_")))),
+          IF(
+              CONTAINS(LCASE(?xref), "mesh"),
+              IRI(CONCAT("http://purl.bioontology.org/ontology/MESH/", ENCODE_FOR_URI(REPLACE(?xref, "·*MESH:", "")))),
+              IRI(CONCAT("http://example.org/xref/", ENCODE_FOR_URI(?xref)))
+            )
+        ) AS ?xrefMondo
+      )
+
+  }
+  UNION
+  {
+    ORDO:Orphanet_91546 oboInOwl:hasDbXref ?xref .
+   
+    BIND(IF(
+          CONTAINS(LCASE(?xref), "mesh"),
+          IRI(CONCAT("http://purl.bioontology.org/ontology/MESH/", ENCODE_FOR_URI(REPLACE(?xref, "·*MeSH:", "")))),
+          IF(
+            CONTAINS(LCASE(?xref), "icd10"),
+            IRI(CONCAT("http://example.org/xref/", ENCODE_FOR_URI(REPLACE(?xref, "^.*ICD10", "ICD10CM")))),
+            IRI(CONCAT("http://example.org/xref/", ENCODE_FOR_URI(?xref)))
+          )
+        ) AS ?xrefOrdo)
+
+  }
+}
+
 """ ;
     schema:target <https://www.orpha.net/sparql> .
 
