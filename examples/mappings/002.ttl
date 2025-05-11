@@ -6,10 +6,15 @@
 
 ex:2_Automatic_mapping_Lyme_sources a sh:SPARQLExecutable,
         sh:SPARQLSelectExecutable ;
-    rdfs:comment "From ORDO, obtain all the matching sources and identifiers for a disease.\n Use these identifiers to query the other cascading resources to obtain a map of the resources linked to a disease. \n - Currently Ordo and Mondo"@en ;
+    rdfs:comment "From ORDO, obtain all the matching sources and identifiers for a disease.\n Use these identifiers to query the other cascading resources to obtain a map of the resources linked to a disease. \n - Status: In Progress"@en ;
     sh:prefixes _:sparql_examples_prefixes ;
     sh:select """
-    #TODO
+    PREFIX oboInOwl: <http://www.geneontology.org/formats/oboInOwl#>
+PREFIX ORDO: <http://www.orpha.net/ORDO/>
+SELECT * WHERE { 
+    ORDO:Orphanet_91546 oboInOwl:hasDbXref ?dbRef .
+}
+
 """ ;
     schema:target <https://www.orpha.net/sparql> .
 
