@@ -75,6 +75,6 @@ WHERE {
   
 }
 """ ;
-    schema:target <https://www.orpha.net/sparql> .
+    schema:target <https://localhost:7200/sparql> .
 
 
