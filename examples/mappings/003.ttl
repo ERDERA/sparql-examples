@@ -6,11 +6,9 @@
 
 ex:2_Manual_Mapping_Lyme_sources a sh:SPARQLExecutable,
         sh:SPARQLSelectExecutable ;
-    rdfs:comment "Generate manual mapping for Lyme from ORDO, MONDO, EFO and DOID"@en ;
+    rdfs:comment "Generate manual mapping (hasDbXref) for Lyme from ORDO, MONDO, EFO and DOID"@en ;
     sh:prefixes _:sparql_examples_prefixes ;
-    sh:select """
-    PREFIX EFO: <http://www.ebi.ac.uk/efo/EFO_>
-PREFIX efo: <http://www.ebi.ac.uk/efo/>
+    sh:select """PREFIX efo: <http://www.ebi.ac.uk/efo/>
 PREFIX oboInOwl: <http://www.geneontology.org/formats/oboInOwl#>
 PREFIX obo: <http://purl.obolibrary.org/obo/>
 PREFIX ORDO: <http://www.orpha.net/ORDO/>
@@ -22,62 +20,59 @@ CONSTRUCT {
   efo:EFO_0008510 oboInOwl:hasDbXref ?xrefEfo .
 }
 WHERE {
+    {
+        ?subject oboInOwl:hasDbXref ?xref .
+    
+        BIND(
+         # BioOntology
+         IF(
+          CONTAINS(UCASE(?xref), "MESH") || CONTAINS(UCASE(?xref), "ICD10CM") || CONTAINS(UCASE(?xref), "ICD9CM"),
+          IRI(CONCAT("http://purl.bioontology.org/ontology/", UCASE(STRBEFORE(?xref, ":")), "/", ENCODE_FOR_URI(STRAFTER(?xref, ":")))),
+          IF(
+            CONTAINS(?xref, "ICD9"),
+            IRI(CONCAT("http://purl.bioontology.org/ontology/ICD9CM/", ENCODE_FOR_URI(REPLACE(?xref, "·*ICD9:", "")))),
+         IF(
+            CONTAINS(?xref, "ICD-10") || CONTAINS(?xref, "ICD10"),
+            IRI(CONCAT("http://purl.bioontology.org/ontology/ICD10CM/", ENCODE_FOR_URI(REPLACE(?xref, "^(?i)(icd-10|icd10):", "")))),
+            # Orphanet
+            IF(
+               CONTAINS(STR(?xref), "Orphanet"),
+               IRI(CONCAT("http://www.orpha.net/ORDO/", ENCODE_FOR_URI(REPLACE(STR(?xref), "^.*Orphanet:", "Orphanet_")))),
+               # EBI
+               IF(
+                  CONTAINS(?xref, "EFO"),
+                  IRI(CONCAT("http://www.ebi.ac.uk/efo/", ENCODE_FOR_URI(REPLACE(?xref, "·*:", "_")))), 
+                  # OBO
+                  IF(
+                     CONTAINS(STR(?xref), "MONDO") || CONTAINS(STR(?xref), "DOID"),
+                     IRI(CONCAT("http://purl.obolibrary.org/obo/", ENCODE_FOR_URI(REPLACE(STR(?xref), ":", "_")))),
+                     IF(
+              			CONTAINS(UCASE(?xref), "NCI"),
+              			IRI(CONCAT("http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#", ENCODE_FOR_URI(REPLACE(?xref, "^.*:", "")))),
+                        # NCIT WEB LINK : IRI(CONCAT("http://purl.obolibrary.org/obo/NCIT_", ENCODE_FOR_URI(REPLACE(?xref, "^.*:", "")))),
+                        IRI(CONCAT("http://example.org/xref/", ENCODE_FOR_URI(?xref)))))))))
+            )
+       AS ?transformedXref
+    )
+    }
   {
     obo:MONDO_0019632 oboInOwl:hasDbXref ?xref .
-    BIND(
-        IF(
-          CONTAINS(STR(?xref), "Orphanet"),
-          IRI(CONCAT("http://www.orpha.net/ORDO/", ENCODE_FOR_URI(REPLACE(STR(?xref), "^.*Orphanet:", "Orphanet_")))),
-          
-          IF(
-    		UCASE(STRBEFORE(?xref, ":")) = "MESH" || UCASE(STRBEFORE(?xref, ":")) = "ICD10CM",
-            IRI(CONCAT("http://purl.bioontology.org/ontology/", UCASE(STRBEFORE(?xref, ":")), "/", ENCODE_FOR_URI(STRAFTER(?xref, ":")))),
-            IF(
-              CONTAINS(?xref, "ICD9"),
-              IRI(CONCAT("http://purl.bioontology.org/ontology/ICD9CM/", ENCODE_FOR_URI(REPLACE(?xref, "·*ICD9:", "")))),
-              IF(
-                  CONTAINS(?xref, "EFO"),
-                  IRI(CONCAT("http://www.ebi.ac.uk/efo/", ENCODE_FOR_URI(REPLACE(?xref, "·*:", "_")))),       
-                  IRI(CONCAT("http://example.org/xref/", ENCODE_FOR_URI(?xref)))
-                        )))
-        ) AS ?xrefMondo
-      )
+    BIND(?transformedXref AS ?xrefMondo)
   }
   UNION
   {
     ORDO:Orphanet_91546 oboInOwl:hasDbXref ?xref .
-   
-    BIND(IF(
-          CONTAINS(LCASE(?xref), "mesh"),
-          IRI(CONCAT("http://purl.bioontology.org/ontology/MESH/", ENCODE_FOR_URI(REPLACE(?xref, "·*MeSH:", "")))),
-          IF(
-            CONTAINS(?xref, "ICD-10"),
-            IRI(CONCAT("http://purl.bioontology.org/ontology/ICD10CM/", ENCODE_FOR_URI(REPLACE(?xref, "^.*ICD-10:", "")))),
-            IRI(CONCAT("http://example.org/xref/", ENCODE_FOR_URI(?xref)))
-          )
-        ) AS ?xrefOrdo)
-
-  }
+    BIND(?transformedXref AS ?xrefOrdo)}
   UNION
-    {
-     	obo:DOID_11729 oboInOwl:hasDbXref ?xref .
-        BIND(IF(
-              CONTAINS(LCASE(?xref), "mesh"),
-              IRI(CONCAT("http://purl.bioontology.org/ontology/MESH/", ENCODE_FOR_URI(REPLACE(?xref, "·*MESH:", "")))),
-               IF(
-                CONTAINS(?xref, "ICD10CM"),
-                IRI(CONCAT("http://purl.bioontology.org/ontology/ICD10CM/", ENCODE_FOR_URI(REPLACE(?xref, "^.*ICD10CM:", "")))),
-                IRI(CONCAT("http://example.org/xref/", ENCODE_FOR_URI(?xref)))
-          )
-            )
- AS ?xrefDoid)
-
-    }
+  {
+    obo:DOID_11729 oboInOwl:hasDbXref ?xref .
+        BIND(?transformedXref AS ?xrefDoid)}
   UNION
-    {
-        efo:EFO_0008510 oboInOwl:hasDbXref ?xref .
-        BIND(IRI(CONCAT("http://example.org/xref/", ENCODE_FOR_URI(?xref))) AS ?xrefEfo)
-    }
+  {
+    efo:EFO_0008510 oboInOwl:hasDbXref ?xref .
+    BIND(?transformedXref AS ?xrefEfo)}
+
+  
 }
 """ ;
     schema:target <https://www.orpha.net/sparql> .
