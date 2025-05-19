@@ -1,0 +1,20 @@
+@prefix ex: <https://www.bgee.org/sparql/.well-known/sparql-examples/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix schema: <https://schema.org/> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+
+ex:006 a sh:SPARQLExecutable,
+        sh:SPARQLSelectExecutable ;
+    rdfs:comment "This query retrieves a list of rare diseases along with their human-readable labels and the number of database cross-references (hasDbXref) associated with each disease. It ranks the diseases in descending order of the number of mappings, helping identify which diseases are most extensively linked to external biomedical databases."@en ;
+    sh:prefixes _:sparql_examples_prefixes ;
+    sh:select """PREFIX ORDO: <http://www.orpha.net/ORDO/>
+PREFIX oboInOwl: <http://www.geneontology.org/formats/oboInOwl#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+SELECT ?disease ?label (count(?dbxref) as ?mappings) WHERE {
+  ?disease oboInOwl:hasDbXref ?dbxref ;
+           rdfs:label ?label .
+}
+GROUP BY ?disease ?label
+ORDER BY DESC(?mappings)
+""" ;
+    schema:target <http://81.24.6.122:9001/default/sparql> .
