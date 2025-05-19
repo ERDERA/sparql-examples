@@ -1,0 +1,19 @@
+@prefix ex: <https://www.bgee.org/sparql/.well-known/sparql-examples/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix schema: <https://schema.org/> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+
+ex:007 a sh:SPARQLExecutable,
+        sh:SPARQLSelectExecutable ;
+    rdfs:comment "This query identifies which external database identifiers (dbxrefs) are most frequently referenced across Orphanet disease terms"@en ;
+    sh:prefixes _:sparql_examples_prefixes ;
+    sh:select """PREFIX ORDO: <http://www.orpha.net/ORDO/>
+PREFIX oboInOwl: <http://www.geneontology.org/formats/oboInOwl#>
+
+SELECT ?dbxref (COUNT(DISTINCT ?disease) AS ?linkedDiseases) WHERE {
+  ?disease oboInOwl:hasDbXref ?dbxref .
+}
+GROUP BY ?dbxref
+ORDER BY DESC(?linkedDiseases)
+""" ;
+    schema:target <http://81.24.6.122:9001/default/sparql> .
